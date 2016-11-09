@@ -19,7 +19,7 @@ func Stamp(csvFilePath, timeSeriesName, event string) error {
 
 	w := csv.NewWriter(csvFile)
 	err = w.Write([]string{
-		time.Now().Format("2006-01-02 15:04:05"), // Excel-readable time format.
+		time.Now().UTC().Format("2006-01-02 15:04:05"), // Excel-readable time format.
 		timeSeriesName,
 		event,
 	})
@@ -28,9 +28,5 @@ func Stamp(csvFilePath, timeSeriesName, event string) error {
 	}
 
 	w.Flush()
-	if err := w.Error(); err != nil {
-		return err
-	}
-
-	return nil
+	return w.Error()
 }
