@@ -26,3 +26,6 @@ tools:
 
 test:
 	${GIT_ROOT}/make/test
+
+dist:
+	${GIT_ROOT}/make/package
