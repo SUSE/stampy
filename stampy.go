@@ -8,7 +8,7 @@ import (
 
 // Stamp creates the csvFile should it not exist, and then append the
 // specified event to its contents.
-func Stamp(csvFilePath, timeSeriesName, event string) error {
+func Stamp(csvFilePath, originPath, timeSeriesName, event string) error {
 	csvFile, err := os.OpenFile(csvFilePath,
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE,
 		0666)
@@ -20,6 +20,7 @@ func Stamp(csvFilePath, timeSeriesName, event string) error {
 	w := csv.NewWriter(csvFile)
 	err = w.Write([]string{
 		time.Now().UTC().Format("2006-01-02 15:04:05"), // Excel-readable time format.
+		originPath,
 		timeSeriesName,
 		event,
 	})
