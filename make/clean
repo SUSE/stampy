@@ -4,5 +4,6 @@ set -o errexit -o nounset
 
 GIT_ROOT=${GIT_ROOT:-$(git rev-parse --show-toplevel)}
 
-rm -rf ${GIT_ROOT}/build
-rm  -f ${GIT_ROOT}/fissile
+rm -rf ${GIT_ROOT}/stampy
+rm  -f ${GIT_ROOT}/stampy.test
+rm  -f ${GIT_ROOT}/stampy*tgz

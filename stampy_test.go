@@ -13,7 +13,7 @@ import (
 func TestStampCreate(t *testing.T) {
 	t.Parallel()
 
-	expected := `,no-series,no-event`
+	expected := `,origin,no-series,no-event`
 	assert := assert.New(t)
 
 	// Create the path for file which does not exist
@@ -23,7 +23,7 @@ func TestStampCreate(t *testing.T) {
 	series := path.Join(workDir, "makethis")
 
 	// Create timestamp
-	err = Stamp(series, "no-series", "no-event")
+	err = Stamp(series, "origin", "no-series", "no-event")
 	assert.Nil(err)
 
 	// Check that the file now exists
@@ -43,7 +43,7 @@ func TestStampCreate(t *testing.T) {
 func TestStampAppend(t *testing.T) {
 	t.Parallel()
 
-	expected := `,no-series,no-event\n.*,no-series,the-event`
+	expected := `,origin,no-series,no-event\n.*,source,no-series,the-event`
 	assert := assert.New(t)
 
 	// Create the path for file which does not exist
@@ -53,11 +53,11 @@ func TestStampAppend(t *testing.T) {
 	series := path.Join(workDir, "makethis")
 
 	// Create timestamp
-	err = Stamp(series, "no-series", "no-event")
+	err = Stamp(series, "origin", "no-series", "no-event")
 	assert.Nil(err)
 
 	// Create another timestamp
-	err = Stamp(series, "no-series", "the-event")
+	err = Stamp(series, "source", "no-series", "the-event")
 	assert.Nil(err)
 
 	// Check that the file now exists
@@ -77,7 +77,7 @@ func TestStampAppend(t *testing.T) {
 func TestStampCSVSpecials(t *testing.T) {
 	t.Parallel()
 
-	expected := `,"""no-series","an,event"`
+	expected := `,",cram","""no-series","an,event"`
 	assert := assert.New(t)
 
 	workDir, err := ioutil.TempDir("", "test_stamp_csvspecial")
@@ -86,7 +86,7 @@ func TestStampCSVSpecials(t *testing.T) {
 	series := path.Join(workDir, "makethis")
 
 	// Create timestamp, use characters special to CSV format
-	err = Stamp(series, `"no-series`, "an,event")
+	err = Stamp(series, `,cram`, `"no-series`, "an,event")
 	assert.Nil(err)
 
 	// Check that the file now exists
