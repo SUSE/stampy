@@ -93,7 +93,7 @@ func graphyCmd(args []string) error {
 			if !ok {
 				return fmt.Errorf("(line %d) found done event with no start event: %s", line, series)
 			}
-			events[series] = append(events[series], uint64(date.Sub(startDate)))
+			events[series] = append(events[series], uint64(date.Sub(startDate)/time.Second))
 			delete(starts, series)
 		} // else invalid event - ignore
 	}
