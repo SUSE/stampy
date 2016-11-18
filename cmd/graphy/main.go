@@ -140,8 +140,7 @@ func writeVerticalCSV(events map[string][]uint64) error {
 		}
 	}
 	writer.Flush()
-
-	return nil
+	return writer.Error()
 }
 
 func writeHorizontalCSV(events map[string][]uint64) error {
@@ -158,6 +157,5 @@ func writeHorizontalCSV(events map[string][]uint64) error {
 		row = row[:0]
 	}
 	writer.Flush()
-
-	return nil
+	return writer.Error()
 }
