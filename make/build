@@ -11,6 +11,8 @@ set +o errexit
 set -o errexit
 set -o nounset
 
-cd cmd
-go build -ldflags="-X main.version=${APP_VERSION}"
-mv cmd ../stampy
+for exe in stampy graphy; do
+  cd ${GIT_ROOT}/cmd/${exe}/
+  go build -ldflags="-X main.version=${APP_VERSION}"
+  mv ${exe} ../../
+done
