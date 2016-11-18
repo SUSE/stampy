@@ -12,10 +12,14 @@ import (
 )
 
 var usage = `Consumes a csv file in the format: YYYY-MM-DD HH:MM:SS,file,timeseries,(start|done)
-and outputs a new csv to stdout that aggregates the time differences between start/end
+and outputs a new csv to stdout that aggregates the time differences between start/end. The output
+format looks like: event,seconds,seconds on horizontal mode. Vertical output transposes this.
 
 Usage:
-  graphy [flags] <csvfilename>
+  graphy [flags] <csvfilename | '-' for stdin>
+
+Example:
+  graphy filename.csv
 
 Flags:
       --orientation string   Display orientation: horizontal or vertical (default "horizontal")`
@@ -51,28 +55,34 @@ func graphyCmd(args []string) error {
 		return errors.New("need more arguments")
 	}
 
+	var ioReader io.Reader
 	filename := args[0]
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
+	if filename == "-" {
+		ioReader = os.Stdin
+	} else {
+		f, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		ioReader = f
+		defer f.Close()
 	}
-	defer f.Close()
 
 	events := make(map[string][]uint64)
 	starts := make(map[string]time.Time)
 
-	reader := csv.NewReader(f)
-	for {
+	reader := csv.NewReader(ioReader)
+	for line := 1; ; line++ {
 		row, err := reader.Read()
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return fmt.Errorf("failed to read row: %v", err)
+			return fmt.Errorf("(line %d) failed to read row: %v", line, err)
 		}
 
 		date, err := time.Parse("2006-01-02 15:04:05", row[0])
 		if err != nil {
-			return fmt.Errorf("failed to parse time value: %v", err)
+			return fmt.Errorf("(line %d) failed to parse time value: %v", line, err)
 		}
 		series := row[2]
 		event := row[3]
@@ -81,22 +91,22 @@ func graphyCmd(args []string) error {
 		} else if event == "done" {
 			startDate, ok := starts[series]
 			if !ok {
-				return fmt.Errorf("found done event with no start event: %s", series)
+				return fmt.Errorf("(line %d) found done event with no start event: %s", line, series)
 			}
 			events[series] = append(events[series], uint64(date.Sub(startDate)))
 			delete(starts, series)
-		}
+		} // else invalid event - ignore
 	}
 
 	switch *orientation {
 	case "vertical":
-		return writeHeadersTop(events)
+		return writeVerticalCSV(events)
 	default:
-		return writeHeadersLeft(events)
+		return writeHorizontalCSV(events)
 	}
 }
 
-func writeHeadersTop(events map[string][]uint64) error {
+func writeVerticalCSV(events map[string][]uint64) error {
 	writer := csv.NewWriter(os.Stdout)
 	var headers []string
 	for series := range events {
@@ -106,6 +116,8 @@ func writeHeadersTop(events map[string][]uint64) error {
 		return fmt.Errorf("failed to write row header: %v", err)
 	}
 
+	// Write timings[i] for each event until timings[i] doesn't exist
+	// for any event.
 	times := make([]string, len(headers))
 	for i := 0; ; i++ {
 		foundTiming := false
@@ -115,7 +127,7 @@ func writeHeadersTop(events map[string][]uint64) error {
 				times[j] = strconv.Itoa(int(timings[i]))
 				foundTiming = true
 			} else {
-				times[j] = "0"
+				times[j] = ""
 			}
 		}
 
@@ -132,7 +144,7 @@ func writeHeadersTop(events map[string][]uint64) error {
 	return nil
 }
 
-func writeHeadersLeft(events map[string][]uint64) error {
+func writeHorizontalCSV(events map[string][]uint64) error {
 	writer := csv.NewWriter(os.Stdout)
 	var row []string
 	for ev, timings := range events {
