@@ -6,11 +6,11 @@ GIT_ROOT=${GIT_ROOT:-$(git rev-parse --show-toplevel)}
 
 set +o errexit
 
-. ${GIT_ROOT}/make/include/versioning
+. "${GIT_ROOT}/make/include/versioning"
 
 set -o errexit
 set -o nounset
 
-cd cmd
-go build -ldflags="-X main.version=${APP_VERSION}"
-mv cmd ../stampy
+for exe in stampy graphy; do
+  go build -ldflags="-X main.version=${APP_VERSION}" "./cmd/${exe}/"
+done

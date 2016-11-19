@@ -2,12 +2,13 @@
 
 GIT_ROOT=${GIT_ROOT:-$(git rev-parse --show-toplevel)}
 
-. ${GIT_ROOT}/make/include/versioning
+. "${GIT_ROOT}/make/include/versioning"
 
 set -o errexit -o nounset
 
 GOOS=${GOOS:-$(go env GOOS)}
 GOARCH=${GOARCH:-$(go env GOARCH)}
 
-${GIT_ROOT}/make/build
-tar czf ${APP_VERSION}-${GOOS}.${GOARCH}.tgz stampy
+"${GIT_ROOT}/make/build"
+tar czf "stampy-${ARTIFACT_VERSION}.${GOOS}.${GOARCH}.tgz" stampy
+tar czf "graphy-${ARTIFACT_VERSION}.${GOOS}.${GOARCH}.tgz" graphy
