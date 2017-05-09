@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hpcloud/stampy"
+	"github.com/SUSE/stampy"
 )
 
 func main() {
