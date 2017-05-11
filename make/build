@@ -11,6 +11,14 @@ set +o errexit
 set -o errexit
 set -o nounset
 
+OSES="linux darwin"
+GOARCH=${GOARCH:-$(go env GOARCH)}
+
 for exe in stampy graphy; do
-  go build -ldflags="-X main.version=${APP_VERSION}" "./cmd/${exe}/"
+  for OS in ${OSES}; do
+      GOOS="${OS}" go build \
+	  -ldflags="-X main.version=${APP_VERSION}" \
+	  -o "build/${OS}-${GOARCH}/${exe}" \
+	  "./cmd/${exe}/"
+  done
 done
